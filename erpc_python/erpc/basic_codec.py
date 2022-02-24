@@ -13,8 +13,8 @@ class BasicCodec(Codec):
     ## Version of this codec.
     BASIC_CODEC_VERSION = 1
 
-    def start_write_message(self, msgInfo):
-        header = (self.BASIC_CODEC_VERSION << 24) \
+    def start_write_message(self, msgInfo:MessageInfo):
+        header:int = (self.BASIC_CODEC_VERSION << 24) \
                         | ((msgInfo.service & 0xff) << 16) \
                         | ((msgInfo.request & 0xff) << 8) \
                         | (msgInfo.type.value & 0xff)
@@ -25,53 +25,53 @@ class BasicCodec(Codec):
         self._buffer += struct.pack(fmt, value)
         self._cursor += struct.calcsize(fmt)
 
-    def write_bool(self, value):
+    def write_bool(self, value:bool):
         self._write('<?', value)
 
-    def write_int8(self, value):
+    def write_int8(self, value:int):
         self._write('<b', value)
 
-    def write_int16(self, value):
+    def write_int16(self, value:int):
         self._write('<h', value)
 
-    def write_int32(self, value):
+    def write_int32(self, value:int):
         self._write('<i', value)
 
-    def write_int64(self, value):
+    def write_int64(self, value:int):
         self._write('<q', value)
 
-    def write_uint8(self, value):
+    def write_uint8(self, value:int):
         self._write('<B', value)
 
-    def write_uint16(self, value):
+    def write_uint16(self, value:int):
         self._write('<H', value)
 
-    def write_uint32(self, value):
+    def write_uint32(self, value:int):
         self._write('<I', value)
 
-    def write_uint64(self, value):
+    def write_uint64(self, value:int):
         self._write('<Q', value)
 
-    def write_float(self, value):
+    def write_float(self, value:float):
         self._write('<f', value)
 
-    def write_double(self, value):
+    def write_double(self, value:float):
         self._write('<d', value)
 
-    def write_string(self, value):
+    def write_string(self, value:str):
         self.write_binary(value.encode())
 
     def write_binary(self, value):
         self.write_uint32(len(value))
         self._buffer += value
 
-    def start_write_list(self, length):
+    def start_write_list(self, length:int):
         self.write_uint32(length)
 
-    def start_write_union(self, discriminator):
+    def start_write_union(self, discriminator:int):
         self.write_uint32(discriminator)
 
-    def write_null_flag(self, flag):
+    def write_null_flag(self, flag:bool):
         self.write_uint8(1 if flag else 0)
 
     ##
@@ -146,6 +146,3 @@ class BasicCodec(Codec):
 
     def read_null_flag(self):
         return self.read_uint8()
-
-
-

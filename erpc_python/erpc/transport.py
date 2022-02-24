@@ -30,10 +30,10 @@ class Transport(object):
     def __init__(self):
         pass
 
-    def send(self, message):
+    def send(self, message:bytearray):
         raise NotImplementedError()
 
-    def receive(self):
+    def receive(self) -> bytearray:
         raise NotImplementedError()
 
 class FramedTransport(Transport):
@@ -50,12 +50,12 @@ class FramedTransport(Transport):
         return self._Crc16
 
     @crc_16.setter
-    def crc_16(self, crcStart):
+    def crc_16(self, crcStart:int):
         if type(crcStart) is not int:
             raise RequestError("invalid CRC, not a number")
         self._Crc16 = Crc16(crcStart)
 
-    def send(self, message):
+    def send(self, message:bytearray):
         try:
             self._sendLock.acquire()
 
@@ -67,7 +67,7 @@ class FramedTransport(Transport):
         finally:
             self._sendLock.release()
 
-    def receive(self):
+    def receive(self) -> bytearray:
         try:
             self._receiveLock.acquire()
 
@@ -85,25 +85,25 @@ class FramedTransport(Transport):
         finally:
             self._receiveLock.release()
 
-    def _base_send(self, data):
+    def _base_send(self, data:bytearray):
         raise NotImplementedError()
 
-    def _base_receive(self):
+    def _base_receive(self, count:int) -> bytearray:
         raise NotImplementedError()
 
 class SerialTransport(FramedTransport):
     def __init__(self, url, baudrate, **kwargs):
         super(SerialTransport, self).__init__()
         self._url = url
-        self._serial = serial.serial_for_url(url, baudrate=baudrate, **kwargs) # 8N1 by default
+        self._serial:serial.Serial = serial.serial_for_url(url, baudrate=baudrate, **kwargs) # 8N1 by default
 
     def close(self):
         self._serial.close()
 
-    def _base_send(self, data):
+    def _base_send(self, data:bytearray):
         self._serial.write(data)
 
-    def _base_receive(self, count):
+    def _base_receive(self, count:int) -> bytearray:
         return self._serial.read(count)
 
 class ConnectionClosed(Exception):
@@ -146,7 +146,7 @@ class TCPTransport(FramedTransport):
         if self._sock:
             self._sock.sendall(message)
 
-    def _base_receive(self, count):
+    def _base_receive(self, count:int) -> bytearray:
         if self._isServer and not self._sock:
             while not self._sock:
                 pass
@@ -183,10 +183,10 @@ class RpmsgTransport(Transport):
             RpmsgEndpoint.Types.DATAGRAM)
 
 
-    def send(self, message):
+    def send(self, message:bytearray):
         self.ept.send(message, self.ept_addr_remote)
 
-    def receive(self):
+    def receive(self) -> bytearray:
         while True:
             ret = self.ept.recv(-1)
             if len(ret[1]) != 0:
@@ -253,10 +253,10 @@ class LIBUSBSIOSPITransport(FramedTransport):
         max_num_bytes = self.sio.GetMaxDataSize ()
         print('Max number of bytes supported for I2C/SPI transfers: %d \r\n' % max_num_bytes)
 
-        # Call SPI_Open and store the _hSPIPort handler 
+        # Call SPI_Open and store the _hSPIPort handler
         self._hSPIPort = self.sio.SPI_Open (int(self._baudrate), portNum=0, dataSize=8, preDelay=0)
 
-        # Configure GPIO pin for SPI master-slave signalling 
+        # Configure GPIO pin for SPI master-slave signalling
         res = self.sio.GPIO_ConfigIOPin (self._gpioport, self._gpiopin, self._gpiomode)
         print('GPIO_ConfigIOPin res: %d \r\n' % res)
         res = self.sio.GPIO_SetPortInDir (self._gpioport, self._gpiopin)
@@ -271,7 +271,7 @@ class LIBUSBSIOSPITransport(FramedTransport):
         self._hSIOPort = None
 
     def _base_send(self, message):
-        # Wait for SPI master-slave signalling GPIO pin to be in low state 
+        # Wait for SPI master-slave signalling GPIO pin to be in low state
         res = self.sio.GPIO_GetPin (self._gpioport, self._gpiopin)
         while (1 == res):
             res = self.sio.GPIO_GetPin (self._gpioport, self._gpiopin)
@@ -284,7 +284,7 @@ class LIBUSBSIOSPITransport(FramedTransport):
         else:
             print('SPI transfer error: %d' % rxbytesnumber)
 
-    def _base_receive(self, count):
+    def _base_receive(self, count:int) -> bytearray:
         # Wait for SPI master-slave signalling GPIO pin to be in low state
         res = self.sio.GPIO_GetPin (self._gpioport, self._gpiopin)
         while (1 == res):
@@ -354,10 +354,10 @@ class LIBUSBSIOI2CTransport(FramedTransport):
         max_num_bytes = self.sio.GetMaxDataSize ()
         print('Max number of bytes supported for SPI/I2C transfers: %d \r\n' % max_num_bytes)
 
-        # Call I2C_Open and store the _hI2CPort handler 
+        # Call I2C_Open and store the _hI2CPort handler
         self._hI2CPort = self.sio.I2C_Open (int(self._baudrate), 0, 0)
 
-        # Configure GPIO pin for I2C master-slave signalling 
+        # Configure GPIO pin for I2C master-slave signalling
         res = self.sio.GPIO_ConfigIOPin (self._gpioport, self._gpiopin, self._gpiomode)
         print('GPIO_ConfigIOPin res: %d \r\n' % res)
         res = self.sio.GPIO_SetPortInDir (self._gpioport, self._gpiopin)
@@ -372,7 +372,7 @@ class LIBUSBSIOI2CTransport(FramedTransport):
         self._hSIOPort = None
 
     def _base_send(self, message):
-        # Wait for I2C master-slave signalling GPIO pin to be in low state 
+        # Wait for I2C master-slave signalling GPIO pin to be in low state
         res = self.sio.GPIO_GetPin (self._gpioport, self._gpiopin)
         while (1 == res):
             res = self.sio.GPIO_GetPin (self._gpioport, self._gpiopin)
@@ -385,8 +385,8 @@ class LIBUSBSIOI2CTransport(FramedTransport):
         else:
             print('I2C transfer error: %d' % rxbytesnumber)
 
-    def _base_receive(self, count):
-        # Wait for I2C master-slave signalling GPIO pin to be in low state 
+    def _base_receive(self, count:int) -> bytearray:
+        # Wait for I2C master-slave signalling GPIO pin to be in low state
         res = self.sio.GPIO_GetPin (self._gpioport, self._gpiopin)
         while (1 == res):
             res = self.sio.GPIO_GetPin (self._gpioport, self._gpiopin)
@@ -399,4 +399,3 @@ class LIBUSBSIOI2CTransport(FramedTransport):
             #print('I2C transfer error: %d' % rxbytesnumber)
             res = self._hI2CPort.Reset ()
             return b"\00" * count
- 

@@ -5,22 +5,23 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+from dataclasses import dataclass
 import threading
-from collections import namedtuple
-from .codec import MessageType
+from .codec import MessageType,Codec
 from .transport import Transport
 
+@dataclass
 class ClientInfo:
-    event = None
-    msg = None
+    event:threading.Event = None
+    msg:bytearray = None
 
 ##
 # @brief Shares a transport between a server and multiple clients.
 class TransportArbitrator(Transport):
-    def __init__(self, sharedTransport=None, codec=None):
+    def __init__(self, sharedTransport:Transport=None, codec:Codec=None):
         self._transport = sharedTransport
         self._codec = codec
-        self._pending_clients = {}
+        self._pending_clients:dict[int,ClientInfo] = {}
         self._lock = threading.Lock()
 
     @property
@@ -28,7 +29,7 @@ class TransportArbitrator(Transport):
         return self._transport
 
     @shared_transport.setter
-    def shared_transport(self, transport):
+    def shared_transport(self, transport:Transport):
         self._transport = transport
 
     @property
@@ -36,10 +37,10 @@ class TransportArbitrator(Transport):
         return self._codec
 
     @codec.setter
-    def codec(self, theCodec):
+    def codec(self, theCodec:Codec):
         self._codec = theCodec
 
-    def send(self, message):
+    def send(self, message:bytearray):
         assert self._transport is not None, "No shared transport was set"
         self._transport.send(message)
 
@@ -132,6 +133,3 @@ class TransportArbitrator(Transport):
             return client.msg
         except KeyError:
             pass
-
-
-

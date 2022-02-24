@@ -6,16 +6,22 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-from enum import Enum
-from collections import namedtuple
+from dataclasses import dataclass
+from enum import Enum,unique
 
+@unique
 class MessageType(Enum):
     kInvocationMessage = 0
     kOnewayMessage = 1
     kReplyMessage = 2
     kNotificationMessage = 3
 
-MessageInfo = namedtuple('MessageInfo', ['type', 'service', 'request', 'sequence'])
+@dataclass
+class MessageInfo:
+    type:MessageType
+    service:int
+    request:int
+    sequence:int
 
 class CodecError(RuntimeError):
     pass
@@ -29,7 +35,7 @@ class Codec(object):
         return self._buffer
 
     @buffer.setter
-    def buffer(self, buf):
+    def buffer(self, buf:bytearray):
         self._buffer = buf
         self._cursor = 0
 
@@ -79,7 +85,7 @@ class Codec(object):
     def write_binary(self, value):
         raise NotImplementedError()
 
-    def start_write_list(self, length):
+    def start_write_list(self, length:int):
         raise NotImplementedError()
 
     def start_write_union(self, discriminator):
@@ -144,7 +150,3 @@ class Codec(object):
 
     def read_null_flag(self):
         raise NotImplementedError()
-
-
-
-
