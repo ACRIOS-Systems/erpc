@@ -5,14 +5,15 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+from dataclasses import dataclass
 import threading
-from collections import namedtuple
 from .codec import MessageType
 from .transport import Transport
 
+@dataclass
 class ClientInfo:
-    event = None
-    msg = None
+    event:threading.Event = None
+    msg:bytearray = None
 
 ##
 # @brief Shares a transport between a server and multiple clients.
@@ -132,6 +133,3 @@ class TransportArbitrator(Transport):
             return client.msg
         except KeyError:
             pass
-
-
-

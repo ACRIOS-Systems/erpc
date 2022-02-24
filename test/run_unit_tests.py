@@ -13,12 +13,14 @@
 # $./run_unit_tests.py [tcp]
 # to run this script with optional transport layer argument
 from subprocess import call
+from enum import Enum, unique
 import re
 import os
 import sys
 
 #define output text colour class
-class bcolors:
+@unique
+class bcolors(Enum):
     GREEN = '\033[36m'
     BLUE = '\033[38;5;097m'
     ORANGE= '\033[38;5;172m'

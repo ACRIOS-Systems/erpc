@@ -46,7 +46,7 @@ class {$iface.name}Client(interface.I{$iface.name}):
         codec.start_write_message(erpc.codec.MessageInfo(
                 type=erpc.codec.MessageType.{% if fn.isReturnValue %}kInvocationMessage{% else %}kOnewayMessage{% endif %},
                 service=self.SERVICE_ID,
-                request=self.{$upper(fn.name)}_ID,
+                request=self.IRequest.{$upper(fn.name)}_ID.value,
                 sequence=request.sequence))
 {% for p in fn.inParameters if not p.serializedViaMember %}
 {%  if p.direction == "in" %}

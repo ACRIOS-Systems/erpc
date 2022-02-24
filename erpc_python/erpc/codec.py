@@ -6,16 +6,22 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-from enum import Enum
-from collections import namedtuple
+from dataclasses import dataclass
+from enum import IntEnum,unique
 
-class MessageType(Enum):
+@unique
+class MessageType(IntEnum):
     kInvocationMessage = 0
     kOnewayMessage = 1
     kReplyMessage = 2
     kNotificationMessage = 3
 
-MessageInfo = namedtuple('MessageInfo', ['type', 'service', 'request', 'sequence'])
+@dataclass
+class MessageInfo:
+    type:MessageType
+    service:int
+    request:int
+    sequence:int
 
 class CodecError(RuntimeError):
     pass
@@ -144,7 +150,3 @@ class Codec(object):
 
     def read_null_flag(self):
         raise NotImplementedError()
-
-
-
-

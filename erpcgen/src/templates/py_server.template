@@ -32,7 +32,7 @@ class {$iface.name}Service(erpc.server.Service):
         self._handler = handler
         self._methods = {
 {% for fn in iface.functions %}
-                interface.I{$iface.name}.{$upper(fn.name)}_ID: self._handle_{$fn.name},
+                interface.I{$iface.name}.IRequest.{$upper(fn.name)}_ID: self._handle_{$fn.name},
 {% endfor -- fn %}
             }
 
@@ -73,7 +73,7 @@ class {$iface.name}Service(erpc.server.Service):
         codec.start_write_message(erpc.codec.MessageInfo(
             type=erpc.codec.MessageType.kReplyMessage,
             service=interface.I{$iface.name}.SERVICE_ID,
-            request=interface.I{$iface.name}.{$upper(fn.name)}_ID,
+            request=interface.I{$iface.name}.IRequest.{$upper(fn.name)}_ID.value,
             sequence=sequence))
 {% for p in fn.outParameters if not p.serializedViaMember %}
 {%  if p.isNullable %}
