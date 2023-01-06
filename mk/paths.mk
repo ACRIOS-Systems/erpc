@@ -24,9 +24,7 @@ CUR_DIR := $(notdir $(CURDIR))
 OUTPUT_ROOT := $(ERPC_ROOT)
 TEST_ROOT :=  $(ERPC_ROOT)/test
 
-ifeq "$(is_mingw)" "1"
-    BOOST_ROOT ?= $(ERPC_ROOT)/erpcgen/VisualStudio_v14/boost_1_67_0
-else ifneq "$(is_darwin)" "1"
+ifneq "$(is_darwin)" "1"
     BOOST_ROOT ?= /usr/local/opt/boost
 else
     ifndef BOOST_ROOT
@@ -89,17 +87,10 @@ else ifeq "$(is_linux)" "1"
 else ifeq "$(is_cygwin)" "1"
     FLEX ?= /bin/flex
     BISON ?= /bin/bison
-else ifeq "$(is_mingw)" "1"
-    FLEX ?= $(ERPC_ROOT)/erpcgen/VisualStudio_v14/win_flex.exe
-    BISON ?= $(ERPC_ROOT)/erpcgen/VisualStudio_v14/win_bison.exe
 endif
 
-ifeq "$(is_mingw)" "1"
-    mkdirc = C:\MinGW\msys\1.0\bin\mkdir.exe
-    CC+=gcc
-else
-    mkdirc = mkdir
-endif
+
+mkdirc = mkdir
 
 #-----------------------------------------------
 # Debug or Release

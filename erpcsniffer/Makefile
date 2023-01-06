@@ -45,11 +45,6 @@ INCLUDES += $(ERPC_ROOT) \
 			$(OBJS_ROOT) \
 			$(BOOST_ROOT)/include
 
-ifeq "$(is_mingw)" "1"
-INCLUDES += $(ERPC_ROOT)/windows \
-			$(BOOST_ROOT)
-endif
-
 SOURCES += 	$(OBJS_ROOT)/erpcgen_parser.tab.cpp \
 			$(OBJS_ROOT)/erpcgen_lexer.cpp \
 			$(ERPC_ROOT)/erpcgen/src/format_string.cpp \
@@ -77,29 +72,20 @@ OBJECT_DEP := $(OBJS_ROOT)/erpcgen_lexer.cpp
 
 include $(ERPC_ROOT)/mk/targets.mk
 
-ifeq "$(is_mingw)" "1"
-    LIBRARIES += -L$(BOOST_ROOT)/stage/lib
-    ifeq "$(build)" "debug"
-        LIBRARIES += -lboost_system-mgw48-mt-1_57 -lboost_filesystem-mgw48-mt-1_57
-    else
-        LIBRARIES += -lboost_system-mgw48-mt-d-1_57 -lboost_filesystem-mgw48-mt-d-1_57
-    endif
-else
-    ifeq "$(is_linux)" "1"
-        LIBRARIES := -lpthread -lrt $(LIBRARIES)
-    endif
+ifeq "$(is_linux)" "1"
+	LIBRARIES := -lpthread -lrt $(LIBRARIES)
+endif
 
-    static_libs := NO
-    ifneq "$(build)" "debug"
-        ifeq "$(is_darwin)" "1"
-            static_libs := $(BOOST_ROOT)/lib/libboost_system.a $(BOOST_ROOT)/lib/libboost_filesystem.a
-        endif
-    endif
-    ifneq "$(static_libs)" "NO"
-        LIBRARIES += $(static_libs)
-    else
-        LIBRARIES += -lboost_system -lboost_filesystem
-    endif
+static_libs := NO
+ifneq "$(build)" "debug"
+	ifeq "$(is_darwin)" "1"
+		static_libs := $(BOOST_ROOT)/lib/libboost_system.a $(BOOST_ROOT)/lib/libboost_filesystem.a
+	endif
+endif
+ifneq "$(static_libs)" "NO"
+	LIBRARIES += $(static_libs)
+else
+	LIBRARIES += -lboost_system -lboost_filesystem
 endif
 
 # Release should be alwas static. Customers don't need install things.

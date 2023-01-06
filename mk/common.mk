@@ -62,15 +62,6 @@ is_darwin := $(and $(findstring Darwin,$(os_name)),1)
 # Set to 1 if running on cygwin.
 is_cygwin := $(and $(findstring CYGWIN,$(os_name)),1)
 
-# Set to 1 if running on mingw.
-ifeq "$(os_name)" ""
-    is_mingw := 1
-    os_name = MINGW
-    MAKE := mingw32-make
-else
-    is_mingw := 0
-endif
-
 # Set to 1 if running on redhat.
 is_redhat := $(shell if [ -f /etc/redhat-release ]; then echo 1 ; fi)
 
@@ -149,15 +140,13 @@ color_ :=
 #
 # Use like:
 #  $(call printmessage,cyan,Building, remainder of the message...)
-ifeq "$(is_mingw)" "0"
-    ifeq "$(BUILD_SDK_COLOR)" "1"
+ifeq "$(BUILD_SDK_COLOR)" "1"
 define printmessage
 if [ -t 1 ]; then printf "$(7)$(color_$(1))$(2)$(color_default)$(3)$(color_$(4))$(5)$(color_default)$(6)\n" ; \
 else printf "$(7)$(2)$(3)$(5)$(6)\n" ; fi
 endef
-    else
+else
 define printmessage
 printf "$(7)$(2)$(3)$(5)$(6)\n" ; fi
 endef
-    endif
 endif

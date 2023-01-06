@@ -4,6 +4,7 @@
 set -e
 
 unameOut="$(uname -s)"
+echo "Os identified as ${unameOut}"
 case "${unameOut}" in
 Linux*)
     echo "Linux os detected. Installing dependencies."
@@ -26,6 +27,9 @@ Darwin*)
     sudo pip install tornado
     sudo pip install --user nose
     sudo pip install pytest --upgrade --ignore-installed six
+    ;;
+Win32*)
+    echo "Windows os detected. Installing dependencies."
     ;;
 *)
     echo "Unknown or currently unsupported os: ${unameOut}"

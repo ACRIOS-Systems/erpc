@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  win: circleci/windows@5.0
+
 jobs:
   build-linux-gcc:
     machine:
@@ -27,14 +30,24 @@ jobs:
       xcode: 13.2.1
     steps:
       - checkout
+      - run:
+          command: chmod u+x install_dependencies.sh && ./install_dependencies.sh clang
+          shell: bash.exe
+      - run:
+          command: chmod u+x run_tests.sh && ./run_tests.sh clang
+          shell: bash.exe
+  build-windows-mingw64:
+    executor: win/default
+    steps:
+      - checkout
       - run: chmod u+x install_dependencies.sh && ./install_dependencies.sh clang
       - run: chmod u+x run_tests.sh && ./run_tests.sh clang
-
 
 workflows:
   build-workflow:
     jobs:
-      - build-linux-gcc
-      - build-linux-clang
+      # - build-linux-gcc
+      # - build-linux-clang
       # - build-mac-gcc # Mac is on going, or it can be hosted on company computer.
       # - build-mac-clang
+      - build-windows-mingw64

@@ -71,10 +71,6 @@ else
     CXXFLAGS += -Os -DNDEBUG
 endif
 
-ifneq "$(is_mingw)" "1"
-    LIBRARIES += -lc
-endif
-
 ifneq "$(is_cygwin)" "1"
     LIBRARIES += -lstdc++
 endif
